@@ -1,17 +1,24 @@
 package com.scc.dao;
 
 import com.scc.model.User;
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
 
     public boolean registerUser(User user) {
-        String sql = "INSERT INTO users(username, password, role) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO users(username, password, role, status) VALUES(?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getPassword());
             pstmt.setString(3, user.getRole());
+            pstmt.setString(4, "PENDING"); // Default status on registration
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -34,6 +41,7 @@ public class UserDao {
                 user.setUsername(rs.getString("username"));
                 user.setPassword(rs.getString("password"));
                 user.setRole(rs.getString("role"));
+                user.setStatus(rs.getString("status"));
                 return user;
             }
         } catch (SQLException e) {
