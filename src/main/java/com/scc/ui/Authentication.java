@@ -25,20 +25,13 @@ public class Authentication {
             System.out.println("[3] Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
 
             switch (choice) {
-                case 1:
-                    handleRegistration();
-                    break;
-                case 2:
-                    handleLogin();
-                    break;
-                case 3:
-                    System.out.println("Exiting system. Goodbye!");
-                    return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+                case 1: handleRegistration(); break;
+                case 2: handleLogin(); break;
+                case 3: System.out.println("Goodbye!"); return;
+                default: System.out.println("Invalid option.");
             }
         }
     }
@@ -46,9 +39,9 @@ public class Authentication {
     private void handleRegistration() {
         System.out.println("\n--- REGISTRATION ---");
         System.out.print("Enter username: ");
-        String regUsername = scanner.nextLine();
+        String username = scanner.nextLine();
         System.out.print("Enter password: ");
-        String regPassword = scanner.nextLine();
+        String password = scanner.nextLine();
 
         System.out.println("\nSelect User Role:");
         System.out.println("[1] Customer / Collector");
@@ -58,17 +51,14 @@ public class Authentication {
         int roleChoice = scanner.nextInt();
         scanner.nextLine();
 
-        String role;
-        switch (roleChoice) {
-            case 1: role = "Customer / Collector"; break;
-            case 2: role = "Store Clerk / Sales Staff"; break;
-            case 3: role = "Store Administrator / Manager"; break;
-            default:
-                System.out.println("Invalid role choice. Defaulting to Customer / Collector.");
-                role = "Customer / Collector";
-        }
+        String role = switch (roleChoice) {
+            case 1 -> "Customer / Collector";
+            case 2 -> "Store Clerk / Sales Staff";
+            case 3 -> "Store Administrator / Manager";
+            default -> "Customer / Collector";
+        };
 
-        User newUser = new User(regUsername, regPassword, role);
+        User newUser = new User(username, password, role);
         if (userDao.registerUser(newUser)) {
             System.out.println("Registration successful! Account status is PENDING.");
         }
@@ -77,23 +67,21 @@ public class Authentication {
     private void handleLogin() {
         System.out.println("\n--- LOGIN ---");
         System.out.print("Enter username: ");
-        String loginUsername = scanner.nextLine();
+        String username = scanner.nextLine();
         System.out.print("Enter password: ");
-        String loginPassword = scanner.nextLine();
+        String password = scanner.nextLine();
 
-        User loggedInUser = userDao.loginUser(loginUsername, loginPassword);
-        if (loggedInUser != null) {
-            boolean isManager = "Store Administrator / Manager".equalsIgnoreCase(loggedInUser.getRole());
+        User user = userDao.loginUser(username, password);
+        if (user != null) {
+            boolean isManager = "Store Administrator / Manager".equalsIgnoreCase(user.getRole());
 
-            // Block Customer and Staff if status is PENDING; Managers bypass this restriction
-            if (!isManager && "PENDING".equalsIgnoreCase(loggedInUser.getStatus())) {
-                System.out.println("\nLogin Denied: Your account is pending approval by an administrator.");
+            if (!isManager && "PENDING".equalsIgnoreCase(user.getStatus())) {
+                System.out.println("\nLogin Denied: Your account is pending administrator approval.");
                 return;
             }
 
-            System.out.println("\nLogin Successful! Welcome, " + loggedInUser.getUsername() + "!");
-            System.out.println("Access Level / Role: " + loggedInUser.getRole());
-            routeUserByRole(loggedInUser);
+            System.out.println("\nLogin Successful! Welcome, " + user.getUsername() + "!");
+            routeUserByRole(user);
         } else {
             System.out.println("Invalid username or password.");
         }
@@ -101,17 +89,10 @@ public class Authentication {
 
     private void routeUserByRole(User user) {
         switch (user.getRole()) {
-            case "Customer / Collector":
-                System.out.println("Redirecting to Customer Menu...");
-                break;
-            case "Store Clerk / Sales Staff":
-                System.out.println("Redirecting to Clerk Menu...");
-                break;
-            case "Store Administrator / Manager":
-                System.out.println("Redirecting to Manager Dashboard...");
-                break;
-            default:
-                System.out.println("No specific dashboard found for role: " + user.getRole());
+            case "Customer / Collector" -> new CustomerMenu(scanner, user).displayMenu();
+            case "Store Clerk / Sales Staff" -> new ClerkMenu(scanner, user).displayMenu();
+            case "Store Administrator / Manager" -> new AdminMenu(userDao, scanner, user).displayMenu();
+            default -> System.out.println("Unknown role.");
         }
     }
 }

@@ -16,14 +16,6 @@ public class User {
         this.status = "PENDING";
     }
 
-    public User(int id, String username, String password, String role, String status) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.status = status;
-    }
-
     // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

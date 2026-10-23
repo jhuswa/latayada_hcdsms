@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        // Initialize the SQLite database and tables
         DatabaseInitializer.initializeDatabase();
 
         UserDao userDao = new UserDao();
