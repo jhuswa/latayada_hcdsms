@@ -44,9 +44,9 @@ public class Authentication {
         String password = scanner.nextLine();
 
         System.out.println("\nSelect User Role:");
-        System.out.println("[1] Customer / Collector");
-        System.out.println("[2] Store Clerk / Sales Staff");
-        System.out.println("[3] Store Administrator / Manager");
+        System.out.println("[1] Customer");
+        System.out.println("[2] Store Clerk");
+        System.out.println("[3] Manager");
         System.out.print("Choose role (1-3): ");
         int roleChoice = scanner.nextInt();
         scanner.nextLine();
